@@ -1,0 +1,1536 @@
+# Generated with protoc-gen-openapi
+# https://github.com/google/gnostic/tree/master/cmd/protoc-gen-openapi
+
+openapi: 3.0.3
+info:
+    title: ""
+    version: 0.0.1
+paths:
+    /v2/accounts:
+        post:
+            tags:
+                - AccountService
+            operationId: AccountService_Register
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/Registration'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Session'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /v2/blocks:
+        get:
+            tags:
+                - AccountService
+            operationId: AccountService_ListBlocks
+            parameters:
+                - name: cursor
+                  in: query
+                  schema:
+                    type: string
+                - name: limit
+                  in: query
+                  schema:
+                    type: integer
+                    format: uint32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Friends'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /v2/blocks/{userId}:
+        post:
+            tags:
+                - AccountService
+            operationId: AccountService_BlockUser
+            parameters:
+                - name: userId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/UserID'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+        delete:
+            tags:
+                - AccountService
+            operationId: AccountService_UnblockUser
+            parameters:
+                - name: userId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /v2/captcha:
+        get:
+            tags:
+                - AccountService
+            operationId: AccountService_CreateCaptcha
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Captcha'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /v2/conversation-events:
+        get:
+            tags:
+                - ConversationService
+            operationId: ConversationService_PullEvents
+            parameters:
+                - name: cursor
+                  in: query
+                  schema:
+                    type: string
+                - name: limit
+                  in: query
+                  schema:
+                    type: integer
+                    format: uint32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Events'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /v2/conversation-events/ack:
+        post:
+            tags:
+                - ConversationService
+            operationId: ConversationService_AckEvents
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/EventAck'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /v2/conversations:
+        get:
+            tags:
+                - ConversationService
+            operationId: ConversationService_ListConversations
+            parameters:
+                - name: cursor
+                  in: query
+                  schema:
+                    type: string
+                - name: limit
+                  in: query
+                  schema:
+                    type: integer
+                    format: uint32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Conversations'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /v2/conversations/{conversationId}:
+        get:
+            tags:
+                - ConversationService
+            operationId: ConversationService_GetConversation
+            parameters:
+                - name: conversationId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Conversation'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /v2/conversations/{conversationId}/messages:
+        get:
+            tags:
+                - ConversationService
+            operationId: ConversationService_ListMessages
+            parameters:
+                - name: conversationId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: afterSeq
+                  in: query
+                  schema:
+                    type: string
+                - name: limit
+                  in: query
+                  schema:
+                    type: integer
+                    format: uint32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Messages'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+        post:
+            tags:
+                - ConversationService
+            operationId: ConversationService_SendMessage
+            parameters:
+                - name: conversationId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/MessageDraft'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Message'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /v2/conversations/{conversationId}/messages/{messageId}/recall:
+        post:
+            tags:
+                - ConversationService
+            operationId: ConversationService_RecallMessage
+            parameters:
+                - name: conversationId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: messageId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/MessageID'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Message'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /v2/conversations/{conversationId}/read-progress:
+        get:
+            tags:
+                - ConversationService
+            operationId: ConversationService_GetReadProgress
+            parameters:
+                - name: conversationId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ReadProgress'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+        patch:
+            tags:
+                - ConversationService
+            operationId: ConversationService_UpdateReadProgress
+            parameters:
+                - name: conversationId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/ReadProgress'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ReadProgress'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /v2/friend-events:
+        get:
+            tags:
+                - AccountService
+            operationId: AccountService_PullFriendEvents
+            parameters:
+                - name: cursor
+                  in: query
+                  schema:
+                    type: string
+                - name: limit
+                  in: query
+                  schema:
+                    type: integer
+                    format: uint32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Events'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /v2/friend-events/ack:
+        post:
+            tags:
+                - AccountService
+            operationId: AccountService_AckFriendEvents
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/EventAck'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /v2/friend-requests:
+        get:
+            tags:
+                - AccountService
+            operationId: AccountService_ListFriendRequests
+            parameters:
+                - name: cursor
+                  in: query
+                  schema:
+                    type: string
+                - name: limit
+                  in: query
+                  schema:
+                    type: integer
+                    format: uint32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/FriendRequests'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+        post:
+            tags:
+                - AccountService
+            operationId: AccountService_CreateFriendRequest
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/FriendRequestDraft'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/FriendRequest'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /v2/friend-requests/{requestId}/accept:
+        post:
+            tags:
+                - AccountService
+            operationId: AccountService_AcceptFriendRequest
+            parameters:
+                - name: requestId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/FriendRequestID'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/FriendRequest'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /v2/friend-requests/{requestId}/cancel:
+        post:
+            tags:
+                - AccountService
+            operationId: AccountService_CancelFriendRequest
+            parameters:
+                - name: requestId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/FriendRequestID'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/FriendRequest'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /v2/friend-requests/{requestId}/reject:
+        post:
+            tags:
+                - AccountService
+            operationId: AccountService_RejectFriendRequest
+            parameters:
+                - name: requestId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/FriendRequestID'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/FriendRequest'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /v2/friends:
+        get:
+            tags:
+                - AccountService
+            operationId: AccountService_ListFriends
+            parameters:
+                - name: cursor
+                  in: query
+                  schema:
+                    type: string
+                - name: limit
+                  in: query
+                  schema:
+                    type: integer
+                    format: uint32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Friends'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /v2/friends/{userId}:
+        get:
+            tags:
+                - AccountService
+            operationId: AccountService_GetFriend
+            parameters:
+                - name: userId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Friend'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+        delete:
+            tags:
+                - AccountService
+            operationId: AccountService_DeleteFriend
+            parameters:
+                - name: userId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+        patch:
+            tags:
+                - AccountService
+            operationId: AccountService_UpdateFriend
+            parameters:
+                - name: userId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/FriendUpdate'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Friend'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /v2/groups:
+        post:
+            tags:
+                - ConversationService
+            operationId: ConversationService_CreateGroup
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/GroupDraft'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Group'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /v2/groups/{groupId}:
+        get:
+            tags:
+                - ConversationService
+            operationId: ConversationService_GetGroup
+            parameters:
+                - name: groupId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Group'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+        delete:
+            tags:
+                - ConversationService
+            operationId: ConversationService_CloseGroup
+            parameters:
+                - name: groupId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+        patch:
+            tags:
+                - ConversationService
+            operationId: ConversationService_UpdateGroup
+            parameters:
+                - name: groupId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/GroupUpdate'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Group'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /v2/groups/{groupId}/join-requests:
+        get:
+            tags:
+                - ConversationService
+            operationId: ConversationService_ListJoinRequests
+            parameters:
+                - name: groupId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/JoinRequests'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+        post:
+            tags:
+                - ConversationService
+            operationId: ConversationService_RequestJoin
+            parameters:
+                - name: groupId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/JoinDraft'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/JoinRequest'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /v2/groups/{groupId}/join-requests/{requestId}/accept:
+        post:
+            tags:
+                - ConversationService
+            operationId: ConversationService_AcceptJoinRequest
+            parameters:
+                - name: groupId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: requestId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/JoinRequestID'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/JoinRequest'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /v2/groups/{groupId}/join-requests/{requestId}/reject:
+        post:
+            tags:
+                - ConversationService
+            operationId: ConversationService_RejectJoinRequest
+            parameters:
+                - name: groupId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: requestId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/JoinRequestID'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/JoinRequest'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /v2/groups/{groupId}/leave:
+        post:
+            tags:
+                - ConversationService
+            operationId: ConversationService_LeaveGroup
+            parameters:
+                - name: groupId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/GroupID'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /v2/groups/{groupId}/members:
+        get:
+            tags:
+                - ConversationService
+            operationId: ConversationService_ListMembers
+            parameters:
+                - name: groupId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/GroupMembers'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+        post:
+            tags:
+                - ConversationService
+            operationId: ConversationService_InviteMembers
+            parameters:
+                - name: groupId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/MemberInvite'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Group'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /v2/groups/{groupId}/members/{userId}:
+        delete:
+            tags:
+                - ConversationService
+            operationId: ConversationService_RemoveMember
+            parameters:
+                - name: groupId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: userId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /v2/sessions:
+        post:
+            tags:
+                - AccountService
+            operationId: AccountService_Login
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/Credentials'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Session'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /v2/sessions/current:
+        delete:
+            tags:
+                - AccountService
+            operationId: AccountService_Logout
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /v2/sessions/refresh:
+        post:
+            tags:
+                - AccountService
+            operationId: AccountService_Refresh
+            requestBody:
+                content:
+                    application/json: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Session'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /v2/users:
+        get:
+            tags:
+                - AccountService
+            operationId: AccountService_FindUser
+            parameters:
+                - name: account
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Profile'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /v2/users/me:
+        get:
+            tags:
+                - AccountService
+            operationId: AccountService_GetMe
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Profile'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+        patch:
+            tags:
+                - AccountService
+            operationId: AccountService_UpdateMe
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/ProfileUpdate'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Profile'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /v2/users/me/password:
+        patch:
+            tags:
+                - AccountService
+            operationId: AccountService_ChangePassword
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/PasswordChange'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+components:
+    schemas:
+        Captcha:
+            type: object
+            properties:
+                captchaId:
+                    type: string
+                image:
+                    type: string
+        Conversation:
+            type: object
+            properties:
+                conversationId:
+                    type: string
+                type:
+                    type: integer
+                    format: enum
+                groupId:
+                    type: string
+                peer:
+                    $ref: '#/components/schemas/Profile'
+                name:
+                    type: string
+                state:
+                    type: integer
+                    format: enum
+                lastMessageSeq:
+                    type: string
+                readSeq:
+                    type: string
+                updatedAt:
+                    type: string
+        Conversations:
+            type: object
+            properties:
+                conversations:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/Conversation'
+                nextCursor:
+                    type: string
+        Credentials:
+            type: object
+            properties:
+                account:
+                    type: string
+                password:
+                    type: string
+                captchaId:
+                    type: string
+                captchaCode:
+                    type: string
+        Event:
+            type: object
+            properties:
+                cursor:
+                    type: string
+                kind:
+                    type: integer
+                    format: enum
+                conversationId:
+                    type: string
+                groupId:
+                    type: string
+                actorId:
+                    type: string
+                userId:
+                    type: string
+                messageId:
+                    type: string
+                messageSeq:
+                    type: string
+                relationship:
+                    type: integer
+                    format: enum
+                state:
+                    type: integer
+                    format: enum
+                occurredAt:
+                    type: string
+        EventAck:
+            type: object
+            properties:
+                cursor:
+                    type: string
+        Events:
+            type: object
+            properties:
+                events:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/Event'
+                nextCursor:
+                    type: string
+                acknowledgedCursor:
+                    type: string
+        Friend:
+            type: object
+            properties:
+                user:
+                    $ref: '#/components/schemas/Profile'
+                remark:
+                    type: string
+                relationship:
+                    type: integer
+                    format: enum
+                conversationId:
+                    type: string
+        FriendRequest:
+            type: object
+            properties:
+                requestId:
+                    type: string
+                senderId:
+                    type: string
+                recipientId:
+                    type: string
+                note:
+                    type: string
+                state:
+                    type: integer
+                    format: enum
+                conversationId:
+                    type: string
+                createdAt:
+                    type: string
+        FriendRequestDraft:
+            type: object
+            properties:
+                userId:
+                    type: string
+                note:
+                    type: string
+        FriendRequestID:
+            type: object
+            properties:
+                requestId:
+                    type: string
+        FriendRequests:
+            type: object
+            properties:
+                requests:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/FriendRequest'
+                nextCursor:
+                    type: string
+        FriendUpdate:
+            type: object
+            properties:
+                userId:
+                    type: string
+                remark:
+                    type: string
+        Friends:
+            type: object
+            properties:
+                friends:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/Friend'
+                nextCursor:
+                    type: string
+        GoogleProtobufAny:
+            type: object
+            properties:
+                '@type':
+                    type: string
+                    description: The type of the serialized message.
+            additionalProperties: true
+            description: Contains an arbitrary serialized message along with a @type that describes the type of the serialized message.
+        Group:
+            type: object
+            properties:
+                groupId:
+                    type: string
+                conversationId:
+                    type: string
+                name:
+                    type: string
+                ownerId:
+                    type: string
+                memberCount:
+                    type: integer
+                    format: uint32
+                requireApproval:
+                    type: boolean
+                closed:
+                    type: boolean
+        GroupDraft:
+            type: object
+            properties:
+                name:
+                    type: string
+                memberUserIds:
+                    type: array
+                    items:
+                        type: string
+                requireApproval:
+                    type: boolean
+        GroupID:
+            type: object
+            properties:
+                groupId:
+                    type: string
+        GroupMember:
+            type: object
+            properties:
+                user:
+                    $ref: '#/components/schemas/Profile'
+                role:
+                    type: integer
+                    format: enum
+                joinedAt:
+                    type: string
+        GroupMembers:
+            type: object
+            properties:
+                members:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/GroupMember'
+        GroupUpdate:
+            type: object
+            properties:
+                groupId:
+                    type: string
+                name:
+                    type: string
+        JoinDraft:
+            type: object
+            properties:
+                groupId:
+                    type: string
+                note:
+                    type: string
+        JoinRequest:
+            type: object
+            properties:
+                requestId:
+                    type: string
+                groupId:
+                    type: string
+                userId:
+                    type: string
+                note:
+                    type: string
+                state:
+                    type: integer
+                    format: enum
+        JoinRequestID:
+            type: object
+            properties:
+                groupId:
+                    type: string
+                requestId:
+                    type: string
+        JoinRequests:
+            type: object
+            properties:
+                requests:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/JoinRequest'
+        MemberInvite:
+            type: object
+            properties:
+                groupId:
+                    type: string
+                userIds:
+                    type: array
+                    items:
+                        type: string
+        Message:
+            type: object
+            properties:
+                messageId:
+                    type: string
+                conversationId:
+                    type: string
+                seq:
+                    type: string
+                sender:
+                    $ref: '#/components/schemas/Profile'
+                content:
+                    type: string
+                sentAt:
+                    type: string
+                recalled:
+                    type: boolean
+        MessageDraft:
+            type: object
+            properties:
+                conversationId:
+                    type: string
+                content:
+                    type: string
+                idempotencyKey:
+                    type: string
+        MessageID:
+            type: object
+            properties:
+                conversationId:
+                    type: string
+                messageId:
+                    type: string
+        Messages:
+            type: object
+            properties:
+                messages:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/Message'
+                nextSeq:
+                    type: string
+        PasswordChange:
+            type: object
+            properties:
+                currentPassword:
+                    type: string
+                newPassword:
+                    type: string
+        Profile:
+            type: object
+            properties:
+                userId:
+                    type: string
+                account:
+                    type: string
+                nickname:
+                    type: string
+                avatarUrl:
+                    type: string
+                bio:
+                    type: string
+        ProfileUpdate:
+            type: object
+            properties:
+                nickname:
+                    type: string
+                avatarUrl:
+                    type: string
+                bio:
+                    type: string
+        ReadProgress:
+            type: object
+            properties:
+                conversationId:
+                    type: string
+                seq:
+                    type: string
+        Registration:
+            type: object
+            properties:
+                account:
+                    type: string
+                password:
+                    type: string
+                nickname:
+                    type: string
+                captchaId:
+                    type: string
+                captchaCode:
+                    type: string
+        Session:
+            type: object
+            properties:
+                token:
+                    type: string
+                expiresAt:
+                    type: string
+                user:
+                    $ref: '#/components/schemas/Profile'
+        Status:
+            type: object
+            properties:
+                code:
+                    type: integer
+                    description: The status code, which should be an enum value of [google.rpc.Code][google.rpc.Code].
+                    format: int32
+                message:
+                    type: string
+                    description: A developer-facing error message, which should be in English. Any user-facing error message should be localized and sent in the [google.rpc.Status.details][google.rpc.Status.details] field, or localized by the client.
+                details:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/GoogleProtobufAny'
+                    description: A list of messages that carry the error details.  There is a common set of message types for APIs to use.
+            description: 'The `Status` type defines a logical error model that is suitable for different programming environments, including REST APIs and RPC APIs. It is used by [gRPC](https://github.com/grpc). Each `Status` message contains three pieces of data: error code, error message, and error details. You can find out more about this error model and how to work with it in the [API Design Guide](https://cloud.google.com/apis/design/errors).'
+        UserID:
+            type: object
+            properties:
+                userId:
+                    type: string
+tags:
+    - name: AccountService
+    - name: ConversationService

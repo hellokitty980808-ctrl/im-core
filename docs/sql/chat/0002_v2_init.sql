@@ -1,0 +1,93 @@
+-- v2 会话与群资料分离；用户文字消息和同步事件分开持久化。
+CREATE TABLE IF NOT EXISTS conversations (
+ id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+ type INT NOT NULL,
+ direct_key VARCHAR(50) CHARACTER SET ascii COLLATE ascii_bin NULL,
+ last_message_seq BIGINT UNSIGNED NOT NULL DEFAULT 0,
+ closed BOOLEAN NOT NULL DEFAULT FALSE,
+ created_at BIGINT NOT NULL,
+ updated_at BIGINT NOT NULL,
+ UNIQUE KEY conversations_direct_pair (direct_key)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE IF NOT EXISTS conversation_members (
+ conversation_id BIGINT UNSIGNED NOT NULL,
+ user_id BIGINT UNSIGNED NOT NULL,
+ state INT NOT NULL DEFAULT 1,
+ read_seq BIGINT UNSIGNED NOT NULL DEFAULT 0,
+ joined_seq BIGINT UNSIGNED NOT NULL DEFAULT 1,
+ joined_at BIGINT NOT NULL,
+ left_at BIGINT NOT NULL DEFAULT 0,
+ PRIMARY KEY (conversation_id, user_id),
+ KEY conversation_members_user (user_id, conversation_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE IF NOT EXISTS `groups` (
+ id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+ conversation_id BIGINT UNSIGNED NOT NULL,
+ name VARCHAR(32) NOT NULL,
+ owner_id BIGINT UNSIGNED NOT NULL,
+ require_approval BOOLEAN NOT NULL DEFAULT FALSE,
+ closed BOOLEAN NOT NULL DEFAULT FALSE,
+ created_at BIGINT NOT NULL,
+ updated_at BIGINT NOT NULL,
+ UNIQUE KEY groups_conversation (conversation_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE IF NOT EXISTS group_members (
+ group_id BIGINT UNSIGNED NOT NULL,
+ user_id BIGINT UNSIGNED NOT NULL,
+ role INT NOT NULL,
+ joined_at BIGINT NOT NULL,
+ left_at BIGINT NOT NULL DEFAULT 0,
+ PRIMARY KEY (group_id, user_id),
+ KEY group_members_user (user_id, group_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE IF NOT EXISTS join_requests (
+ id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+ group_id BIGINT UNSIGNED NOT NULL,
+ user_id BIGINT UNSIGNED NOT NULL,
+ note VARCHAR(200) NOT NULL DEFAULT '',
+ state INT NOT NULL DEFAULT 1,
+ created_at BIGINT NOT NULL,
+ updated_at BIGINT NOT NULL,
+ UNIQUE KEY join_requests_member (group_id, user_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE IF NOT EXISTS messages (
+ id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+ conversation_id BIGINT UNSIGNED NOT NULL,
+ seq BIGINT UNSIGNED NOT NULL,
+ sender_id BIGINT UNSIGNED NOT NULL,
+ content TEXT NOT NULL,
+ sent_at BIGINT NOT NULL,
+ recalled BOOLEAN NOT NULL DEFAULT FALSE,
+ UNIQUE KEY messages_sequence (conversation_id, seq)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE IF NOT EXISTS send_keys (
+ sender_id BIGINT UNSIGNED NOT NULL,
+ send_key VARCHAR(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+ request_hash CHAR(64) CHARACTER SET ascii NOT NULL,
+ message_id BIGINT UNSIGNED NOT NULL,
+ response JSON NOT NULL,
+ created_at BIGINT NOT NULL,
+ PRIMARY KEY (sender_id, send_key)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE IF NOT EXISTS conversation_events (
+ id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+ user_id BIGINT UNSIGNED NOT NULL,
+ data JSON NOT NULL,
+ created_at BIGINT NOT NULL,
+ KEY conversation_events_user (user_id, id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE IF NOT EXISTS event_cursors (
+ user_id BIGINT UNSIGNED NOT NULL PRIMARY KEY,
+ acknowledged_cursor BIGINT UNSIGNED NOT NULL DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE IF NOT EXISTS outbox (
+ id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+ event_key VARCHAR(100) NOT NULL,
+ payload JSON NOT NULL,
+ published BOOLEAN NOT NULL DEFAULT FALSE,
+ attempts INT UNSIGNED NOT NULL DEFAULT 0,
+ next_attempt_at BIGINT NOT NULL DEFAULT 0,
+ created_at BIGINT NOT NULL,
+ UNIQUE KEY outbox_event (event_key),
+ KEY outbox_retry (published, next_attempt_at, id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

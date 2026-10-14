@@ -1,0 +1,90 @@
+name: imcore
+
+x-env: &env
+  TZ: UTC
+  CONSUL_ADDR: consul:8500
+  DB_NAME_PREFIX: ${DB_NAME_PREFIX:-imcore}
+  DB_USER: ${DB_USER:-root}
+  DB_PASSWORD: ${DB_PASSWORD:?运行 make init-local}
+  REDIS_HOST: redis
+  REDIS_PASSWORD: ${REDIS_PASSWORD:?运行 make init-local}
+  RABBITMQ_USER: ${RABBITMQ_USER:-imcore}
+  RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:?运行 make init-local}
+  JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY:?运行 make init-local}
+  JWT_PRIVATE_KEY: ${JWT_PRIVATE_KEY:?运行 make init-local}
+  CAPTCHA_DISABLED: ${CAPTCHA_DISABLED:-false}
+  WS_ALLOWED_ORIGINS: ${WS_ALLOWED_ORIGINS:-}
+
+x-app: &app
+  build: .
+  image: imcore:local
+  restart: unless-stopped
+  environment: *env
+  depends_on:
+    mysql: {condition: service_healthy}
+    redis: {condition: service_healthy}
+    rabbitmq: {condition: service_healthy}
+    consul: {condition: service_started}
+
+services:
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:?运行 make init-local}
+      MYSQL_ROOT_HOST: '%'
+      TZ: UTC
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: [CMD-SHELL, 'mysqladmin ping -h 127.0.0.1 -uroot -p"$$MYSQL_ROOT_PASSWORD" --silent']
+      interval: 3s
+      timeout: 3s
+      retries: 40
+  redis:
+    image: valkey/valkey:9.1-alpine
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?运行 make init-local}
+    command: [sh, -c, 'exec valkey-server --appendonly yes --requirepass "$$REDIS_PASSWORD"']
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: [CMD-SHELL, 'valkey-cli -a "$$REDIS_PASSWORD" ping | grep -q PONG']
+      interval: 3s
+      timeout: 3s
+      retries: 30
+  rabbitmq:
+    image: rabbitmq:4.1.6-management-alpine
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-imcore}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:?运行 make init-local}
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    healthcheck:
+      test: [CMD, rabbitmq-diagnostics, -q, ping]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+  consul:
+    image: hashicorp/consul:1.22
+    command: agent -dev -client=0.0.0.0
+  user:
+    <<: *app
+    command: [/app/bin/user, -conf, /app/configs/user]
+  chat:
+    <<: *app
+    command: [/app/bin/chat, -conf, /app/configs/chat]
+  connect:
+    <<: *app
+    command: [/app/bin/connect, -conf, /app/configs/connect]
+    ports:
+      - '127.0.0.1:${WEBSOCKET_PORT:-16200}:8081'
+  gateway:
+    <<: *app
+    command: [/app/bin/gateway, -conf, /app/configs/gateway]
+    ports:
+      - '127.0.0.1:${GATEWAY_PORT:-18000}:8080'
+
+volumes:
+  mysql-data:
+  redis-data:
+  rabbitmq-data:

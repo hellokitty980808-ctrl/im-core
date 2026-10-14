@@ -1,0 +1,113 @@
+syntax = "proto3";
+package imcore.v2;
+option go_package = "github.com/hellokitty980808-ctrl/im-core/api/im/v2;v2";
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+
+// 所有 ID 和游标采用 uint64，JSON 中使用字符串；时间单位均为 Unix 毫秒。
+enum RequestState { REQUEST_STATE_UNSPECIFIED = 0; PENDING = 1; ACCEPTED = 2; REJECTED = 3; CANCELLED = 4; }
+enum Relationship { RELATIONSHIP_UNSPECIFIED = 0; NONE = 1; FRIEND = 2; BLOCKED = 3; }
+enum ConversationType { CONVERSATION_TYPE_UNSPECIFIED = 0; DIRECT = 1; GROUP = 2; }
+enum ConversationState { CONVERSATION_STATE_UNSPECIFIED = 0; ACTIVE = 1; LEFT = 2; CLOSED = 3; }
+enum MemberRole { MEMBER_ROLE_UNSPECIFIED = 0; MEMBER = 1; OWNER = 2; }
+enum EventKind { EVENT_KIND_UNSPECIFIED = 0; FRIEND_CHANGED = 1; GROUP_MEMBER_CHANGED = 2; GROUP_CLOSED = 3; MESSAGE_RECALLED = 4; }
+message Profile { uint64 user_id = 1; string account = 2; string nickname = 3; string avatar_url = 4; string bio = 5; }
+message Captcha { string captcha_id = 1; string image = 2; }
+message Credentials { string account = 1; string password = 2; string captcha_id = 3; string captcha_code = 4; }
+message Registration { string account = 1; string password = 2; string nickname = 3; string captcha_id = 4; string captcha_code = 5; }
+message Session { string token = 1; int64 expires_at = 2; Profile user = 3; }
+message SessionToken { string token = 1; }
+message Identity { uint64 user_id = 1; string session_id = 2; }
+message UserID { uint64 user_id = 1; }
+message AccountQuery { string account = 1; }
+message ProfileUpdate { optional string nickname = 1; optional string avatar_url = 2; optional string bio = 3; }
+message PasswordChange { string current_password = 1; string new_password = 2; }
+message FriendRequestDraft { uint64 user_id = 1; string note = 2; }
+message FriendRequestID { uint64 request_id = 1; }
+message FriendRequest { uint64 request_id = 1; uint64 sender_id = 2; uint64 recipient_id = 3; string note = 4; RequestState state = 5; uint64 conversation_id = 6; int64 created_at = 7; }
+message Page { uint64 cursor = 1; uint32 limit = 2; }
+message FriendRequests { repeated FriendRequest requests = 1; uint64 next_cursor = 2; }
+message Friend { Profile user = 1; string remark = 2; Relationship relationship = 3; uint64 conversation_id = 4; }
+message Friends { repeated Friend friends = 1; uint64 next_cursor = 2; }
+message FriendUpdate { uint64 user_id = 1; string remark = 2; }
+message RelationshipQuery { uint64 first_user_id = 1; uint64 second_user_id = 2; }
+message RelationshipCheck { bool allowed = 1; }
+message Event { uint64 cursor = 1; EventKind kind = 2; uint64 conversation_id = 3; uint64 group_id = 4; uint64 actor_id = 5; uint64 user_id = 6; uint64 message_id = 7; uint64 message_seq = 8; Relationship relationship = 9; ConversationState state = 10; int64 occurred_at = 11; }
+message Events { repeated Event events = 1; uint64 next_cursor = 2; uint64 acknowledged_cursor = 3; }
+message EventAck { uint64 cursor = 1; }
+message DirectPair { uint64 first_user_id = 1; uint64 second_user_id = 2; }
+message ConversationID { uint64 conversation_id = 1; }
+message Conversation { uint64 conversation_id = 1; ConversationType type = 2; uint64 group_id = 3; Profile peer = 4; string name = 5; ConversationState state = 6; uint64 last_message_seq = 7; uint64 read_seq = 8; int64 updated_at = 9; }
+message Conversations { repeated Conversation conversations = 1; uint64 next_cursor = 2; }
+message GroupID { uint64 group_id = 1; }
+message GroupDraft { string name = 1; repeated uint64 member_user_ids = 2; bool require_approval = 3; }
+message Group { uint64 group_id = 1; uint64 conversation_id = 2; string name = 3; uint64 owner_id = 4; uint32 member_count = 5; bool require_approval = 6; bool closed = 7; }
+message GroupUpdate { uint64 group_id = 1; string name = 2; }
+message MemberInvite { uint64 group_id = 1; repeated uint64 user_ids = 2; }
+message MemberID { uint64 group_id = 1; uint64 user_id = 2; }
+message GroupMember { Profile user = 1; MemberRole role = 2; int64 joined_at = 3; }
+message GroupMembers { repeated GroupMember members = 1; }
+message JoinDraft { uint64 group_id = 1; string note = 2; }
+message JoinRequestID { uint64 group_id = 1; uint64 request_id = 2; }
+message JoinRequest { uint64 request_id = 1; uint64 group_id = 2; uint64 user_id = 3; string note = 4; RequestState state = 5; }
+message JoinRequests { repeated JoinRequest requests = 1; }
+message MessageDraft { uint64 conversation_id = 1; string content = 2; string idempotency_key = 3; }
+message Message { uint64 message_id = 1; uint64 conversation_id = 2; uint64 seq = 3; Profile sender = 4; string content = 5; int64 sent_at = 6; bool recalled = 7; }
+message MessageID { uint64 conversation_id = 1; uint64 message_id = 2; }
+message MessageQuery { uint64 conversation_id = 1; uint64 after_seq = 2; uint32 limit = 3; }
+message Messages { repeated Message messages = 1; uint64 next_seq = 2; }
+message ReadProgress { uint64 conversation_id = 1; uint64 seq = 2; }
+message Delivery { repeated uint64 user_ids = 1; string type = 2; bytes data = 3; }
+service AccountService {
+  rpc CreateCaptcha (google.protobuf.Empty) returns (Captcha) { option (google.api.http) = { get: "/v2/captcha"; }; }
+  rpc Register (Registration) returns (Session) { option (google.api.http) = { post: "/v2/accounts"; body: "*"; }; }
+  rpc Login (Credentials) returns (Session) { option (google.api.http) = { post: "/v2/sessions"; body: "*"; }; }
+  rpc Refresh (google.protobuf.Empty) returns (Session) { option (google.api.http) = { post: "/v2/sessions/refresh"; body: "*"; }; }
+  rpc Logout (google.protobuf.Empty) returns (google.protobuf.Empty) { option (google.api.http) = { delete: "/v2/sessions/current"; }; }
+  rpc GetMe (google.protobuf.Empty) returns (Profile) { option (google.api.http) = { get: "/v2/users/me"; }; }
+  rpc UpdateMe (ProfileUpdate) returns (Profile) { option (google.api.http) = { patch: "/v2/users/me"; body: "*"; }; }
+  rpc ChangePassword (PasswordChange) returns (google.protobuf.Empty) { option (google.api.http) = { patch: "/v2/users/me/password"; body: "*"; }; }
+  rpc FindUser (AccountQuery) returns (Profile) { option (google.api.http) = { get: "/v2/users"; }; }
+  rpc ListFriends (Page) returns (Friends) { option (google.api.http) = { get: "/v2/friends"; }; }
+  rpc GetFriend (UserID) returns (Friend) { option (google.api.http) = { get: "/v2/friends/{user_id}"; }; }
+  rpc UpdateFriend (FriendUpdate) returns (Friend) { option (google.api.http) = { patch: "/v2/friends/{user_id}"; body: "*"; }; }
+  rpc DeleteFriend (UserID) returns (google.protobuf.Empty) { option (google.api.http) = { delete: "/v2/friends/{user_id}"; }; }
+  rpc BlockUser (UserID) returns (google.protobuf.Empty) { option (google.api.http) = { post: "/v2/blocks/{user_id}"; body: "*"; }; }
+  rpc UnblockUser (UserID) returns (google.protobuf.Empty) { option (google.api.http) = { delete: "/v2/blocks/{user_id}"; }; }
+  rpc ListBlocks (Page) returns (Friends) { option (google.api.http) = { get: "/v2/blocks"; }; }
+  rpc CreateFriendRequest (FriendRequestDraft) returns (FriendRequest) { option (google.api.http) = { post: "/v2/friend-requests"; body: "*"; }; }
+  rpc ListFriendRequests (Page) returns (FriendRequests) { option (google.api.http) = { get: "/v2/friend-requests"; }; }
+  rpc AcceptFriendRequest (FriendRequestID) returns (FriendRequest) { option (google.api.http) = { post: "/v2/friend-requests/{request_id}/accept"; body: "*"; }; }
+  rpc RejectFriendRequest (FriendRequestID) returns (FriendRequest) { option (google.api.http) = { post: "/v2/friend-requests/{request_id}/reject"; body: "*"; }; }
+  rpc CancelFriendRequest (FriendRequestID) returns (FriendRequest) { option (google.api.http) = { post: "/v2/friend-requests/{request_id}/cancel"; body: "*"; }; }
+  rpc PullFriendEvents (Page) returns (Events) { option (google.api.http) = { get: "/v2/friend-events"; }; }
+  rpc AckFriendEvents (EventAck) returns (google.protobuf.Empty) { option (google.api.http) = { post: "/v2/friend-events/ack"; body: "*"; }; }
+  rpc Authenticate (SessionToken) returns (Identity);
+  rpc GetProfile (UserID) returns (Profile);
+  rpc CheckRelationship (RelationshipQuery) returns (RelationshipCheck);
+}
+service ConversationService {
+  rpc ListConversations (Page) returns (Conversations) { option (google.api.http) = { get: "/v2/conversations"; }; }
+  rpc GetConversation (ConversationID) returns (Conversation) { option (google.api.http) = { get: "/v2/conversations/{conversation_id}"; }; }
+  rpc CreateGroup (GroupDraft) returns (Group) { option (google.api.http) = { post: "/v2/groups"; body: "*"; }; }
+  rpc GetGroup (GroupID) returns (Group) { option (google.api.http) = { get: "/v2/groups/{group_id}"; }; }
+  rpc UpdateGroup (GroupUpdate) returns (Group) { option (google.api.http) = { patch: "/v2/groups/{group_id}"; body: "*"; }; }
+  rpc ListMembers (GroupID) returns (GroupMembers) { option (google.api.http) = { get: "/v2/groups/{group_id}/members"; }; }
+  rpc InviteMembers (MemberInvite) returns (Group) { option (google.api.http) = { post: "/v2/groups/{group_id}/members"; body: "*"; }; }
+  rpc RemoveMember (MemberID) returns (google.protobuf.Empty) { option (google.api.http) = { delete: "/v2/groups/{group_id}/members/{user_id}"; }; }
+  rpc LeaveGroup (GroupID) returns (google.protobuf.Empty) { option (google.api.http) = { post: "/v2/groups/{group_id}/leave"; body: "*"; }; }
+  rpc CloseGroup (GroupID) returns (google.protobuf.Empty) { option (google.api.http) = { delete: "/v2/groups/{group_id}"; }; }
+  rpc RequestJoin (JoinDraft) returns (JoinRequest) { option (google.api.http) = { post: "/v2/groups/{group_id}/join-requests"; body: "*"; }; }
+  rpc ListJoinRequests (GroupID) returns (JoinRequests) { option (google.api.http) = { get: "/v2/groups/{group_id}/join-requests"; }; }
+  rpc AcceptJoinRequest (JoinRequestID) returns (JoinRequest) { option (google.api.http) = { post: "/v2/groups/{group_id}/join-requests/{request_id}/accept"; body: "*"; }; }
+  rpc RejectJoinRequest (JoinRequestID) returns (JoinRequest) { option (google.api.http) = { post: "/v2/groups/{group_id}/join-requests/{request_id}/reject"; body: "*"; }; }
+  rpc SendMessage (MessageDraft) returns (Message) { option (google.api.http) = { post: "/v2/conversations/{conversation_id}/messages"; body: "*"; }; }
+  rpc ListMessages (MessageQuery) returns (Messages) { option (google.api.http) = { get: "/v2/conversations/{conversation_id}/messages"; }; }
+  rpc RecallMessage (MessageID) returns (Message) { option (google.api.http) = { post: "/v2/conversations/{conversation_id}/messages/{message_id}/recall"; body: "*"; }; }
+  rpc UpdateReadProgress (ReadProgress) returns (ReadProgress) { option (google.api.http) = { patch: "/v2/conversations/{conversation_id}/read-progress"; body: "*"; }; }
+  rpc GetReadProgress (ConversationID) returns (ReadProgress) { option (google.api.http) = { get: "/v2/conversations/{conversation_id}/read-progress"; }; }
+  rpc PullEvents (Page) returns (Events) { option (google.api.http) = { get: "/v2/conversation-events"; }; }
+  rpc AckEvents (EventAck) returns (google.protobuf.Empty) { option (google.api.http) = { post: "/v2/conversation-events/ack"; body: "*"; }; }
+  rpc EnsureDirect (DirectPair) returns (ConversationID);
+}
+service DeliveryService { rpc Push (Delivery) returns (google.protobuf.Empty); }

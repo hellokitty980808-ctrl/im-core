@@ -1,0 +1,15 @@
+syntax = "proto3";
+package imcore.config;
+option go_package = "github.com/hellokitty980808-ctrl/im-core/pkg/platform;platform";
+message Config {
+ string grpc_addr = 1;
+ string http_addr = 2;
+ string mysql_dsn = 3;
+ string redis_addr = 4;
+ string redis_password = 5;
+ string consul_addr = 6;
+ string broker_url = 7;
+ string private_key = 8;
+ string public_key = 9;
+ bool captcha_disabled = 10;
+}

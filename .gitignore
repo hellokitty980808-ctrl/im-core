@@ -1,0 +1,16 @@
+# 本地凭据与环境
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+# 构建和运行产物
+bin/
+.tools/
+logs/
+*.log
+*.test
+coverage*
+.DS_Store
+.idea/
+.vscode/
